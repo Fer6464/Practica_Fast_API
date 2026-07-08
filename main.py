@@ -9,7 +9,6 @@ import os
 
 load_dotenv()
 supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_PUBLISHABLE_KEY"))
-
 app = FastAPI()
 
 fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}, 
@@ -73,7 +72,6 @@ def update_item(item_name: str, item: Item):
    return {"error": "Item not found"}
 
 
-
 @app.put("/items/{item_name}/query")
 def update_item_with_query(item_name: str, item: Item, q: str | None = None):
    for i, fake_item in enumerate(fake_items_db):
@@ -84,3 +82,17 @@ def update_item_with_query(item_name: str, item: Item, q: str | None = None):
             response.update({"q": q})
          return response
    return {"error": "Item not found"}
+
+
+@app.post("/tasks/")
+def create_task(task: Task):
+  data = supabase.table("task").insert({
+      "title": task.title,
+      "description": task.description,
+  }).execute()
+  return data.data
+
+@app.get("/tasks/")
+def get_tasks():
+   data = supabase.table("task").select("*").execute()
+   return data.data
